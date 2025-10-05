@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <title>Team Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .main-container {
+            width: 100%;
+            max-width: 1200px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            width: 400px;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: 10px;
+        }
+        .popup input, .popup select, .popup textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .popup button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .member-fields {
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            max-height: 70vh;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .card {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .card h3 {
+            margin: 10px 0 5px;
+            font-size: 18px;
+            color: #333;
+        }
+        .card p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .details-container {
+            width: 100%;
+            margin-top: 20px;
+            display: none;
+        }
+        .details-card {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .details-card h2 {
+            margin: 0 0 10px;
+            color: #007bff;
+        }
+        .details-card h3 {
+            margin: 15px 0 5px;
+            color: #333;
+        }
+        .details-card p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .details-card .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .details-card .row:last-child {
+            border-bottom: none;
+        }
+        .details-card .row .column {
+            flex: 1;
+            text-align: left;
+        }
+        .details-card .row .column:first-child {
+            flex: 2;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .progress-bar .progress {
+            height: 100%;
+            background-color: #007bff;
+            border-radius: 5px;
+        }
+        .instructions-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            width: 400px;
+            max-width: 90%;
+            border-radius: 10px;
+        }
+        .instructions-popup p {
+            margin: 0;
+        }
+        .instructions-popup button {
+            margin-top: 10px;
+        }
+        .pie-chart {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(#007bff 0%, #e0e0e0 0%);
+            margin: 20px auto;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        .container {
+            width: 70%;
+        }
+        .completed-tasks {
+           margin-top:50px;
+           margin-right:650px;
+             
+            width: 25%;
+            border-left: 2px solid #ccc;
+            padding-left: 20px;
+        }
+        .task-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+        }
+        .completed-task {
+            
+            background: #d4edda;
+        }
+        #j
+        {
+            position:absolute;
+            top:20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="button-container">
+            <button onclick="openCreateTeamPopup()"> + Create Team</button><br><br><br>
+            
+        </div>
+        <button id="j" onclick="openJoinGroupPopup()">Join Group</button>
+        <div class="cards-container" id="cardsContainer"></div>
+    </div>
+    
+    <div class="overlay" id="overlay"></div>
+    <div class="popup" id="createTeamPopup">
+        <h2>Create Team</h2>
+        <form id="teamForm">
+            <label for="teamName">Team Name:</label>
+            <input type="text" id="teamName" name="teamName" required>
+
+            <label for="taskName">Task Name:</label>
+            <input type="text" id="taskName" name="taskName" required>
+
+            <label for="totalMembers">Total Number of Members:</label>
+            <input type="number" id="totalMembers" name="totalMembers" min="1" required onchange="addMemberFields()">
+            <input type="file" id="taskImage" accept="image/*">
+
+            <div id="memberContainer"></div>
+
+            <button type="button" onclick="saveForm()">Save</button>
+            <button type="button" onclick="closePopup()">Close</button>
+        </form>
+    </div>
+
+    <div class="details-container" id="detailsContainer">
+        <div class="details-card" id="detailsCard"></div>
+    </div>
+
+    <div class="instructions-popup" id="instructionsPopup">
+        <p id="instructionsText"></p>
+        <button onclick="closeInstructionsPopup()">Close</button>
+    </div>
+    
+    <div id="joinGroupPopup" class="popup">
+        <h2>Join a Team</h2>
+        <label for="joinTeamName">Team Name:</label>
+        <input type="text" id="joinTeamName" required>
+    
+        <label for="joinCode">Join Code:</label>
+        <input type="text" id="joinCode" required>
+    
+        <button onclick="joinTeam()">Join</button>
+        <button onclick="closeJoinGroupPopup()">Cancel</button>
+    </div>
+    <!-- Main Task Section -->
+    <div class="container">
+        <h2>Active Tasks</h2>
+        <div id="taskContainer"></div>
+    </div>
+
+    <!-- Completed Task Section -->
+    <div class="completed-tasks">
+        <h2>Completed Tasks</h2>
+        <div id="completedTaskContainer"></div>
+    </div>
+    
+    <script>
+        let teams = JSON.parse(localStorage.getItem('teams')) || [];
+        let currentData = null;
+
+        function openCreateTeamPopup() {
+            document.getElementById('createTeamPopup').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function closePopup() {
+            document.getElementById('createTeamPopup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function addMemberFields() {
+            const totalMembers = document.getElementById('totalMembers').value;
+            const memberContainer = document.getElementById('memberContainer');
+            memberContainer.innerHTML = '';
+
+            for (let i = 1; i <= totalMembers; i++) {
+                const memberFields = `
+                    <div class="member-fields">
+                        <h3>Member ${i}</h3>
+                        <label for="memberName${i}">Member Name:</label>
+                        <input type="text" id="memberName${i}" name="memberName${i}" required>
+
+                        <label for="memberEmail${i}">Member Email:</label>
+                        <input type="email" id="memberEmail${i}" name="memberEmail${i}" required>
+
+                        <label for="task${i}">Task:</label>
+                        <input type="text" id="task${i}" name="task${i}" required>
+
+                        <label for="date${i}">Date:</label>
+                        <input type="date" id="date${i}" name="date${i}" required>
+
+                        <label for="time${i}">Time to Complete:</label>
+                        <input type="time" id="time${i}" name="time${i}" required>
+
+                        <label for="instructions${i}">Instructions:</label>
+                        <textarea id="instructions${i}" name="instructions${i}" rows="3" required></textarea>
+
+                        <label for="progress${i}">Progress (%):</label>
+                        <input type="number" id="progress${i}" name="progress${i}" min="0" max="100" required>
+                    </div>
+                `;
+                memberContainer.innerHTML += memberFields;
+            }
+        }
+
+       document.addEventListener("DOMContentLoaded", loadSavedTeams); // Load teams on page load
+
+       function saveForm() {
+    const teamName = document.getElementById('teamName').value;
+    const taskName = document.getElementById('taskName').value;
+    const totalMembers = parseInt(document.getElementById('totalMembers').value, 10);
+    const imageFile = document.getElementById('taskImage').files[0];
+
+    if (!imageFile) {
+        alert("Please upload an image for the task.");
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function (event) {
+        const imageUrl = event.target.result;
+        const teams = JSON.parse(localStorage.getItem('teams')) || [];
+        const members = [];
+
+        for (let i = 1; i <= totalMembers; i++) {
+           
+            const member = {
+                name: document.getElementById(`memberName${i}`).value,
+                email: document.getElementById(`memberEmail${i}`).value,
+                task: document.getElementById(`task${i}`).value,
+                date: document.getElementById(`date${i}`).value,
+                time: document.getElementById(`time${i}`).value,
+                instructions: document.getElementById(`instructions${i}`).value,
+                progress: document.getElementById(`progress${i}`).value,
+            };
+            members.push(member);
+
+            // Schedule an alarm for the due date and time
+            scheduleAlarm(member.date, member.time, member.task);
+        }
+
+        // Generate a unique join code
+        const joinCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+        const teamCode = `team-${Date.now()}`;
+
+        const team = { teamCode, teamName, taskName, totalMembers, members, imageUrl, joinCode };
+        teams.push(team);
+        localStorage.setItem('teams', JSON.stringify(teams));
+
+        // Send join code in email (DO NOT REMOVE)
+        members.forEach(member => {
+            fetch("http://localhost:3000/send-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    to: member.email,
+                    subject: `Join Your Team: ${teamName}`,
+                    text: `Hello ${member.name},\n\nYou have been invited to join the team: ${teamName}.\n\nJoin Code: ${joinCode}\n\nUse this code to join the team from the dashboard.\n\nBest Regards,\nTeam Manager`
+                })
+            })
+            .then(response => response.json())
+            .then(data => console.log(`Email sent to ${member.email}:`, data))
+            .catch(error => console.error(`Error sending email to ${member.email}:`, error));
+        });
+      
+        addTeamCard(team);
+        loadTasks();
+     
+        alert(`Team created! `);
+        closePopup();
+    };
+
+    reader.readAsDataURL(imageFile);
+}
+
+// Function to schedule an alarm
+function scheduleAlarm(date, time, taskName) {
+    const dueDateTime = new Date(`${date}T${time}`);
+    const currentTime = new Date();
+    const timeDiff = dueDateTime - currentTime;
+
+    if (timeDiff > 0) {
+        setTimeout(() => {
+            playAlarm(taskName);
+        }, timeDiff);
+    }
+}
+
+// Function to play alarm sound
+function playAlarm(taskName) {
+    alert(`⏰ Reminder: It's time for your task - ${taskName}!`);
+    const audio = new Audio("C:\Users\HP\OneDrive\Documents\project\group\alarm.wav"); // Make sure alarm.mp3 exists in your project
+    audio.play();
+}
+
+function deleteCard(teamCode) {
+    let teams = JSON.parse(localStorage.getItem('teams')) || [];
+
+    // Remove the selected team from the array
+    teams = teams.filter(team => team.teamCode !== teamCode);
+
+    // Update localStorage
+    localStorage.setItem('teams', JSON.stringify(teams));
+
+    // Remove the card from the DOM
+    const cardElement = document.getElementById(`card-${teamCode}`);
+    if (cardElement) {
+        cardElement.remove();
+    }
+}
+
+
+// Function to add a team card with uploaded image
+// Function to add a team card with uploaded image
+function addTeamCard(team) {
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.id = `card-${team.teamCode}`; // Ensure a unique ID for deletion
+
+    card.innerHTML = `
+        <img src="${team.imageUrl}" alt="Task Image">
+        <div class="card-content">
+            <h3>${team.teamName}</h3>
+            <p><strong>Task:</strong> ${team.taskName}</p>
+        </div>
+        <span class="icon-container">
+            <i class="fa-solid fa-comment comment-icon" onclick="event.stopPropagation(); openChatGroup('${team.teamCode}')"></i>
+            <i class="fa-solid fa-trash delete-icon" onclick="event.stopPropagation(); deleteCard('${team.teamCode}')"></i>
+        </span>
+        <div class="chat-group" id="chat-${team.teamCode}" style="display: none;">
+            <div class="chat-messages" id="messages-${team.teamCode}"></div>
+            <input type="text" id="input-${team.teamCode}" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage('${team.teamCode}')">
+        </div>
+    `;
+
+    card.addEventListener("click", () => showDetails(team));
+
+    document.getElementById('cardsContainer').appendChild(card);
+
+    loadMessages(team.teamCode); // Load stored messages
+}
+
+// Function to open chat group
+function openChatGroup(teamCode) {
+    const chatGroup = document.getElementById(`chat-${teamCode}`);
+    chatGroup.style.display = chatGroup.style.display === "none" ? "block" : "none";
+}
+
+// Function to send message and store it locally
+function sendMessage(teamCode) {
+    const input = document.getElementById(`input-${teamCode}`);
+    const message = input.value.trim();
+    if (message === "") return;
+
+    const messagesContainer = document.getElementById(`messages-${teamCode}`);
+    const messageElement = document.createElement("p");
+    messageElement.innerHTML = `${message} <i class="fa-solid fa-trash delete-msg-icon" ondblclick="deleteMessage(this, '${teamCode}', '${message}')"></i>`;
+    messagesContainer.appendChild(messageElement);
+
+    saveMessage(teamCode, message);
+    input.value = "";
+}
+
+// Function to save messages in localStorage
+function saveMessage(teamCode, message) {
+    let messages = JSON.parse(localStorage.getItem(`chat-${teamCode}`)) || [];
+    messages.push(message);
+    localStorage.setItem(`chat-${teamCode}`, JSON.stringify(messages));
+}
+
+// Function to load stored messages
+function loadMessages(teamCode) {
+    const messagesContainer = document.getElementById(`messages-${teamCode}`);
+    let messages = JSON.parse(localStorage.getItem(`chat-${teamCode}`)) || [];
+    messages.forEach(message => {
+        const messageElement = document.createElement("p");
+        messageElement.innerHTML = `${message} <i class="fa-solid fa-trash delete-msg-icon" ondblclick="deleteMessage(this, '${teamCode}', '${message}')"></i>`;
+        messagesContainer.appendChild(messageElement);
+    });
+}
+
+// Function to delete a message
+function deleteMessage(element, teamCode, message) {
+    element.parentElement.remove();
+    let messages = JSON.parse(localStorage.getItem(`chat-${teamCode}`)) || [];
+    messages = messages.filter(msg => msg !== message);
+    localStorage.setItem(`chat-${teamCode}`, JSON.stringify(messages));
+}
+
+
+
+// Function to load saved teams and display them
+function loadSavedTeams() {
+    const teams = JSON.parse(localStorage.getItem('teams')) || [];
+    teams.forEach(team => addTeamCard(team));
+}
+
+
+
+
+
+
+        function showDetails(data) {
+    currentData = data;
+    const detailsCard = document.getElementById('detailsCard');
+    const totalProgress = data.members.reduce((sum, member) => sum + parseInt(member.progress), 0) / data.members.length;
+
+    detailsCard.innerHTML = `
+        <h2 style="text-align: center; margin-bottom: 20px;">${data.teamName}</h2>
+        <p><strong>Task Name:</strong> ${data.taskName}</p>
+        <p><strong>Total Members:</strong> ${data.totalMembers}</p>
+        <div class="pie-chart" style="background: conic-gradient(#007bff ${totalProgress}%, #e0e0e0 ${totalProgress}%); margin-bottom: 20px;"></div>
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="background-color: #f2f2f2;">
+                    <th style="padding: 10px; border-bottom: 2px solid #ddd;">Member Name</th>
+                    <th style="padding: 10px; border-bottom: 2px solid #ddd;">Task</th>
+                    <th style="padding: 10px; border-bottom: 2px solid #ddd;">Date</th>
+                    <th style="padding: 10px; border-bottom: 2px solid #ddd;">Time</th>
+                    <th style="padding: 10px; border-bottom: 2px solid #ddd;">Status</th>
+                    <th style="padding: 10px; border-bottom: 2px solid #ddd;">Instructions</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${data.members.map((member, index) => `
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 10px;">${member.name}</td>
+                        <td style="padding: 10px;">${member.task}</td>
+                        <td style="padding: 10px;">${member.date}</td>
+                        <td style="padding: 10px;">${member.time}</td>
+                        <td style="padding: 10px;">
+                            <div class="progress-bar" style="background: #e0e0e0; border-radius: 5px; overflow: hidden;">
+                                <div class="progress" style="width: ${member.progress}%; background: #007bff; height: 10px;"></div>
+                            </div>
+                            <input type="number" min="0" max="100" value="${member.progress}" style="margin-top: 5px; width: 50px;" onchange="updateProgress(${index}, this.value)">
+                        </td>
+                        <td style="padding: 10px;"><a href="#" onclick="showInstructions('${member.instructions}')" style="color: #007bff; text-decoration: none;">Click Here</a></td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+    document.getElementById('detailsContainer').style.display = 'block';
+}
+
+
+window.onload = function () {
+    loadTasks();
+    loadCompletedTasks();
+};
+
+function loadTasks() {
+    const taskContainer = document.getElementById("taskContainer");
+    const completedTaskContainer = document.getElementById("completedTaskContainer");
+
+    taskContainer.innerHTML = "";
+    completedTaskContainer.innerHTML = "";
+
+    let teams = JSON.parse(localStorage.getItem("teams")) || [];
+    let completedTeams = JSON.parse(localStorage.getItem("completedTasks")) || [];
+
+    let remainingTeams = [];
+
+    teams.forEach((team, index) => {
+        let allCompleted = team.members.every(member => parseInt(member.progress) === 100);
+
+        const taskCard = document.createElement("div");
+        taskCard.classList.add("task-card");
+        taskCard.innerHTML = `
+            <h3>${team.taskName} (${team.teamName})</h3>
+            <p>Members:</p>
+            <ul>
+                ${team.members.map(member => `
+                    <li>${member.name} - Progress: 
+                        <input type="number" min="0" max="100" value="${member.progress}" 
+                            onchange="updateProgress(${index}, '${member.name}', this.value)">
+                        %</li>
+                `).join('')}
+            </ul>
+        `;
+
+        if (allCompleted) {
+            taskCard.classList.add("completed-task");
+
+            // Prevent duplicate entries in completedTasks
+            if (!completedTeams.some(t => t.teamName === team.teamName && t.taskName === team.taskName)) {
+                completedTeams.push(team);
+            }
+
+            completedTaskContainer.appendChild(taskCard);
+        } else {
+            taskContainer.appendChild(taskCard);
+            remainingTeams.push(team);
+        }
+    });
+
+    // Save remaining teams (removes completed tasks from main storage)
+    localStorage.setItem("teams", JSON.stringify(remainingTeams));
+    localStorage.setItem("completedTasks", JSON.stringify(completedTeams));
+
+    // Load Completed Tasks from Storage
+    completedTeams.forEach((team) => {
+        const completedTaskCard = document.createElement("div");
+        completedTaskCard.classList.add("task-card", "completed-task");
+        completedTaskCard.innerHTML = `
+            <h3>${team.taskName} (${team.teamName})</h3>
+            <p>Task Completed by Team!</p>
+        `;
+        completedTaskContainer.appendChild(completedTaskCard);
+    });
+}
+
+// Ensure tasks are loaded on window load
+window.onload = loadTasks;
+
+
+function updateProgress(teamIndex, memberName, newProgress) {
+    let teams = JSON.parse(localStorage.getItem("teams")) || [];
+
+    if (teamIndex >= teams.length) return;
+
+    let team = teams[teamIndex];
+
+    // Ask user for join code
+    const joinCode = prompt("Enter your join code to update progress:");
+
+    if (joinCode !== team.joinCode) {
+        alert("Incorrect join code! Status update failed.");
+        return;
+    }
+
+    team.members.forEach(member => {
+        if (member.name === memberName) {
+            member.progress = newProgress;
+        }
+    });
+
+    localStorage.setItem("teams", JSON.stringify(teams));
+
+    // Find and update progress bar dynamically
+    document.querySelectorAll(".task-card").forEach((taskCard, index) => {
+        if (index === teamIndex) {
+            taskCard.querySelectorAll(".progress-bar").forEach((bar, i) => {
+                if (team.members[i].name === memberName) {
+                    const progressDiv = bar.querySelector(".progress");
+                    const progressText = taskCard.querySelectorAll(".progress-text")[i];
+
+                    progressDiv.style.width = `${newProgress}%`;
+                    progressText.innerText = `${newProgress}%`;
+                }
+            });
+        }
+    });
+
+    loadTasks(); // Refresh task UI & move to completed if needed
+}
+
+
+// Function to load completed tasks in a separate section
+function loadCompletedTasks() {
+    const completedTaskContainer = document.getElementById("completedTaskContainer");
+    completedTaskContainer.innerHTML = "";
+
+    let completedTeams = JSON.parse(localStorage.getItem("completedTasks")) || [];
+
+    completedTeams.forEach(team => {
+        const completedTaskCard = document.createElement("div");
+        completedTaskCard.classList.add("completed-task-card");
+        completedTaskCard.innerHTML = `
+            <h3>${team.taskName} (${team.teamName})</h3>
+            <p>Completed by all members</p>
+        `;
+        completedTaskContainer.appendChild(completedTaskCard);
+    });
+}
+
+
+             
+
+
+
+
+        function showInstructions(instructions) {
+            document.getElementById('instructionsText').innerText = instructions;
+            document.getElementById('instructionsPopup').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function closeInstructionsPopup() {
+            document.getElementById('instructionsPopup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function openJoinGroupPopup() {
+    document.getElementById('joinGroupPopup').style.display = 'block';
+}
+
+function closeJoinGroupPopup() {
+    document.getElementById('joinGroupPopup').style.display = 'none';
+}
+function joinTeam() {
+    const joinTeamName = document.getElementById('joinTeamName').value.trim();
+    const joinCode = document.getElementById('joinCode').value.trim();
+    let teams = JSON.parse(localStorage.getItem('teams')) || [];
+
+    // Find the team with matching name and code
+    const team = teams.find(t => t.teamName === joinTeamName && t.joinCode === joinCode);
+
+    if (team) {
+        alert(`Joined team: ${team.teamName}!`);
+        addTeamCard(team);
+        closeJoinGroupPopup();
+    } else {
+        alert('Invalid team name or join code. Please try again.');
+    }
+}
+
+
+       
+        
+    </script>
+    <script src="server.js"></script>
+</body>
+</html>

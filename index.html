@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Kanban Board</title>
+    <style>
+      body {
+        display: flex;
+        margin: 0;
+        font-family: Arial, sans-serif;
+      }
+      .sidebar {
+        width: 250px;
+        background: #2c3e50;
+        color: rgb(253, 247, 247);
+        height: 100vh;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+      .sidebar ul {
+        list-style: none;
+        padding: 0;
+      }
+      .sidebar ul li {
+        padding: 10px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .sidebar ul li:hover {
+        background: #34495e;
+      }
+      .content {
+        flex-grow: 1;
+        padding: 20px;
+        display: none;
+      }
+      .active {
+        display: block;
+      }
+      .kanban-board {
+        display: flex;
+        gap: 20px;
+      }
+      .column {
+        flex: 1;
+        background: #f4f4f4;
+        padding: 10px;
+        border-radius: 5px;
+      }
+
+      #group_link a {
+        text-decoration: none;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <h2 class="menu-heading">MENU</h2>
+
+      <ul>
+        <ul>
+          <li onclick="showSection('routine')">
+            <i class="fas fa-calendar-alt"></i> Routine
+          </li>
+          <li onclick="showSection('kanban-board')">
+            <i class="fas fa-columns"></i> Kanban Board
+          </li>
+          <li id="group_link">
+            <a href='group.html'
+              ><i class="fas fa-users"></i> Group</a
+            >
+          </li>
+          <li onclick="showSection('library')">
+            <i class="fas fa-book"></i> Library
+          </li>
+          <li onclick="showSection('tracker')">
+            <i class="fas fa-chart-line"></i> Tracker
+          </li>
+        </ul>
+      </ul>
+    </div>
+
+    <div id="library" class="content">
+      <h2>Library</h2>
+      <div class="motivational-thoughts">
+        <h3>Motivational Thoughts</h3>
+        <p id="thought">"The only limit is your imagination."</p>
+        <button id="new-thought">New Thought</button>
+      </div>
+      <div class="notes">
+        <h3>Notes</h3>
+        <textarea id="note" placeholder="Write your note here..."></textarea>
+        <button id="save-note">Save Note</button>
+        <ul id="note-list"></ul>
+      </div>
+    </div>
+
+    <div id="kanban-board" class="content">
+      <h2>Kanban Board</h2>
+      <div class="kanban-board">
+        <div class="column" id="todo">
+          <h3>To Do</h3>
+          <div class="task-form">
+            <input type="text" id="new-task" placeholder="Add a new task..." />
+            <button id="add-task">Add</button>
+          </div>
+          <div class="tasks" id="todo-tasks"></div>
+        </div>
+        <div class="column" id="in-progress">
+          <h3>In Progress</h3>
+          <div class="tasks" id="in-progress-tasks"></div>
+        </div>
+        <div class="column" id="done">
+          <h3>Done</h3>
+          <div class="tasks" id="done-tasks"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="routine" class="content">
+      <div class="container">
+        <h2>Task Routine</h2>
+        <button class="add-task-btn" onclick="showPopup()">Add Task</button>
+        <div id="taskContainer"></div>
+      </div>
+
+      <div class="popup" id="taskPopup">
+        <h3>Add New Task</h3>
+        <input type="text" id="taskTitle" placeholder="Task Name" />
+        <input type="time" id="taskFrom" /> to <input type="time" id="taskTo" />
+        <input type="color" id="taskTheme" />
+        <select id="taskPeriod">
+          <option>AM</option>
+          <option>PM</option>
+        </select>
+        <div class="emoji-list" id="emojiPicker"></div>
+        <button onclick="storeTask()">Save</button>
+        <button onclick="hidePopup()">Cancel</button>
+      </div>
+    </div>
+    <div id="tracker" class="content">
+      <div class="container">
+        <h1>Daily Data Tracker</h1>
+        <div class="button-group">
+          <button onclick="addSleepHour()">Add Sleep Hour</button>
+          <button onclick="addPhoneUsageHour()">Add Phone Usage Hour</button>
+          <button onclick="openMoodPopup()">Add Mood</button>
+        </div>
+
+        <div class="chart-container">
+          <h2>Sleep Hours</h2>
+          <canvas id="sleepChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+          <h2>Phone Usage Hours</h2>
+          <canvas id="phoneUsageChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+          <h2>Mood Over Time</h2>
+          <canvas id="moodChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Mood Popup -->
+      <div class="overlay" id="overlay"></div>
+      <div class="popup" id="moodPopup">
+        <h3>Select Your Mood</h3>
+        <select id="moodSelect">
+          <option value="Happy">😊 Happy</option>
+          <option value="Sad">😢 Sad</option>
+          <option value="Neutral">😐 Neutral</option>
+          <option value="Excited">🤩 Excited</option>
+          <option value="Angry">😡 Angry</option>
+          <option value="Tired">😴 Tired</option>
+          <option value="Anxious">😰 Anxious</option>
+          <option value="Confused">🤔 Confused</option>
+        </select>
+        <button onclick="addMood()">Submit</button>
+        <button onclick="closeMoodPopup()">Close</button>
+      </div>
+    </div>
+
+    <script>
+      function showSection(sectionId) {
+        document.querySelectorAll(".content").forEach((section) => {
+          section.classList.remove("active");
+        });
+        document.getElementById(sectionId).classList.add("active");
+      }
+    </script>
+    <script src="script.js"></script>
+  </body>
+</html>
